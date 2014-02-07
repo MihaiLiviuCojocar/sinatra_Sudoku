@@ -2,6 +2,8 @@ require 'sinatra' # load sinatra
 require_relative './lib/sudoku'
 require_relative './lib/cell'
 
+enable :sessions
+
 def random_sudoku
     # we're using 9 numbers, 1 to 9, and 72 zeros as an input
     # it's obvious there may be no clashes as all numbers are unique
@@ -13,7 +15,24 @@ def random_sudoku
     sudoku.to_s.chars
 end
 
+def puzzle(sudoku)
+  sudoku = random_sudoku
+  indices = (1..81).to_a.sample(40)
+  indices.each do |index|
+    sudoku[index] = ""
+  end
+  sudoku
+end
+
 get '/' do
-  @current_solution = random_sudoku
+  sudoku = random_sudoku
+  session[:solution] = sudoku
+  @current_solution = puzzle(sudoku)
   erb :index
 end
+
+get '/solution' do
+  @current_solution = session[:solution]
+  erb :index
+end
+
